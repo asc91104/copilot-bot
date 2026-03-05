@@ -1,9 +1,10 @@
-# Copilot Bot (GitHub Copilot SDK + Web Chat)
+# Copilot Bot (GitHub Copilot SDK + Web Chat + Telegram Webhook)
 
 ## Requirements
 - Node.js 20+
 - GitHub Copilot CLI installed and authenticated
 - Access to model `claude-haiku-4.5`
+- For Telegram: a Telegram Bot token from BotFather and a public HTTPS URL
 
 ## Setup
 1. Install dependencies:
@@ -14,7 +15,11 @@
    ```bash
    copy .env.example .env
    ```
-3. (Optional) set `GITHUB_TOKEN` in `.env`
+3. Set env values in `.env`
+   - Optional: `GITHUB_TOKEN`
+   - Telegram: `TELEGRAM_BOT_TOKEN`
+   - Optional security: `TELEGRAM_WEBHOOK_SECRET`
+   - Optional custom path: `TELEGRAM_WEBHOOK_PATH`
 
 ## Run
 ```bash
@@ -30,3 +35,28 @@ Open [http://localhost:3000](http://localhost:3000).
 - `POST /api/start` body: `{ "userId": "optional" }`
 - `POST /api/end` body: `{ "userId": "required" }`
 - `POST /api/chat` body: `{ "userId": "required", "message": "required" }`
+
+## Telegram Webhook
+1. Expose your app with a public HTTPS URL (e.g. `https://your-domain.com`).
+2. Set env values:
+   - `TELEGRAM_BOT_TOKEN=<bot token>`
+   - `TELEGRAM_WEBHOOK_URL=https://your-domain.com` (or pass URL in API body)
+   - Optional: `TELEGRAM_WEBHOOK_SECRET=<secret token>`
+3. Register webhook:
+   ```pwsh
+   $body = @{ webhookUrl = "https://your-domain.com" } | ConvertTo-Json
+   Invoke-RestMethod -Method POST -Uri "http://localhost:3000/api/telegram/set-webhook" -ContentType "application/json" -Body $body
+   ```
+4. Telegram will send updates to:
+   - `<TELEGRAM_WEBHOOK_URL><TELEGRAM_WEBHOOK_PATH>`
+   - default: `https://your-domain.com/webhooks/telegram`
+
+The webhook endpoint reuses the same session behavior as web chat:
+- Send `/start` in Telegram to create a session
+- Send `/end` to close a session
+- Any other text is sent to Copilot session
+
+### Network Notes
+- If Telegram webhook registration intermittently times out in Node but works in terminal, keep default TELEGRAM_PREFER_IPV4=true.
+- You can tune timeout/retry with TELEGRAM_API_TIMEOUT_MS and TELEGRAM_API_RETRIES.
+
