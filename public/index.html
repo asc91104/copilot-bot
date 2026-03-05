@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Copilot Bot Chat</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="chat-shell">
+      <h1>Copilot Bot</h1>
+      <p class="hint">使用 <code>/start</code> 建立新 Session，<code>/end</code> 結束當前 Session。</p>
+
+      <div id="chatBox" class="chat-box"></div>
+
+      <form id="chatForm" class="chat-form">
+        <input id="messageInput" type="text" placeholder="輸入訊息..." autocomplete="off" />
+        <button type="submit">送出</button>
+      </form>
+
+      <div class="actions">
+        <button id="startBtn" type="button">/start</button>
+        <button id="endBtn" type="button">/end</button>
+      </div>
+
+      <p id="status" class="status">未連線</p>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

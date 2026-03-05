@@ -1,0 +1,19 @@
+{
+  "name": "copilotbot",
+  "version": "1.0.0",
+  "description": "Simple web chat bot powered by GitHub Copilot SDK",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@github/copilot-sdk": "^0.1.30",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "uuid": "^13.0.0"
+  }
+}
