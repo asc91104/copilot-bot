@@ -93,7 +93,7 @@ async function handleMessage(userId, message) {
   const trimmed = message.trim();
   const command = trimmed.split(/\s+/, 1)[0].toLowerCase();
 
-  if (command === "/start" || command.startsWith("/start@")) {
+  if (command === "/new" || command.startsWith("/new@")) {
     const session = await startSession(userId);
     return {
       userId,
@@ -102,7 +102,7 @@ async function handleMessage(userId, message) {
     };
   }
 
-  if (command === "/end" || command.startsWith("/end@")) {
+  if (command === "/reset" || command.startsWith("/reset@")) {
     const ended = await endSession(userId);
     if (!ended) {
       throw new HttpError(400, "No active session");
@@ -113,7 +113,7 @@ async function handleMessage(userId, message) {
 
   const session = getUserSession(userId);
   if (!session) {
-    throw new HttpError(400, "No active session. Send /start first.");
+    throw new HttpError(400, "No active session. Send /new first.");
   }
 
   const response = await session.sendAndWait({ prompt: trimmed }, 120000);
