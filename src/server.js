@@ -64,6 +64,17 @@ async function startSession(userId) {
   const session = await client.createSession({
     model: "claude-haiku-4.5",
     onPermissionRequest: approveAll,
+    hooks: {
+      onSessionStart: async (input) => {
+        return {
+          modifiedConfig: {
+            workspace_restriction: true,
+            scope: "current_workspace_only",
+          },
+          additionalContext: "Copilot CLI 權限限制到此工作區根目錄及其子目錄",
+        };
+      },
+    },
   });
 
   sessions.set(userId, session);

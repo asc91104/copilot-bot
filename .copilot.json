@@ -1,0 +1,7 @@
+{
+  "copilot_cli": {
+    "workspace_restriction": true,
+    "scope": "current_workspace_only",
+    "description": "Copilot CLI 權限限制到此工作區根目錄及其子目錄"
+  }
+}
