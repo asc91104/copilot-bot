@@ -254,25 +254,35 @@ async function processTelegramUpdate(update) {
   const userId = String(message?.from?.id ?? chatId);
   console.log(`Telegram update received chatId=${chatId} userId=${userId}`);
 
+  // Send immediate status notification
   try {
-    const result = await handleMessage(userId, text);
-    await sendTelegramMessage(chatId, result.reply);
-    console.log(`Telegram reply sent chatId=${chatId}`);
+    await sendTelegramMessage(chatId, "⏳ Processing your request...");
   } catch (error) {
-    const errorMessage =
-      error instanceof HttpError ? error.message : "Server error. Try again later.";
-
-    try {
-      await sendTelegramMessage(chatId, errorMessage);
-      console.log(`Telegram error message sent chatId=${chatId}`);
-    } catch (telegramError) {
-      console.error("Failed to send Telegram message", telegramError);
-    }
-
-    if (!(error instanceof HttpError)) {
-      console.error("Telegram update processing failed", error);
-    }
+    console.error("Failed to send status message", error);
   }
+
+  // Process message asynchronously in background
+  setImmediate(async () => {
+    try {
+      const result = await handleMessage(userId, text);
+      await sendTelegramMessage(chatId, result.reply);
+      console.log(`Telegram reply sent chatId=${chatId}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof HttpError ? error.message : "Server error. Try again later.";
+
+      try {
+        await sendTelegramMessage(chatId, `❌ ${errorMessage}`);
+        console.log(`Telegram error message sent chatId=${chatId}`);
+      } catch (telegramError) {
+        console.error("Failed to send Telegram message", telegramError);
+      }
+
+      if (!(error instanceof HttpError)) {
+        console.error("Telegram update processing failed", error);
+      }
+    }
+  });
 }
 
 app.post("/api/start", async (req, res) => {
