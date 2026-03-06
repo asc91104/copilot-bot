@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { setDefaultResultOrder } from "node:dns";
 import https from "node:https";
 import { CopilotClient, approveAll } from "@github/copilot-sdk";
+import taskManager from "./taskManager.js";
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -20,7 +21,6 @@ if (telegramPreferIpv4) {
 }
 
 app.use(express.json());
-app.use(express.static("public"));
 
 let client;
 let clientStarted = false;
@@ -364,6 +364,8 @@ app.post(telegramWebhookPath, async (req, res) => {
   void processTelegramUpdate(req.body);
 });
 
+app.use(express.static("public"));
+
 app.post("/api/telegram/set-webhook", async (req, res) => {
   try {
     if (!telegramBotToken) {
@@ -404,11 +406,54 @@ app.get("/health", (_, res) => {
   res.json({ ok: true });
 });
 
-const server = app.listen(port, () => {
+// Cron Task Management APIs
+app.get("/api/tasks", (_, res) => {
+  const tasks = taskManager.listTasks();
+  res.json({ tasks });
+});
+
+app.get("/api/tasks/:taskName", (req, res) => {
+  const { taskName } = req.params;
+  const task = taskManager.getTask(taskName);
+  
+  if (!task) {
+    return res.status(404).json({ error: `Task "${taskName}" not found` });
+  }
+  
+  res.json({ task });
+});
+
+app.post("/api/tasks/:taskName/stop", (req, res) => {
+  const { taskName } = req.params;
+  const stopped = taskManager.stopTask(taskName);
+  
+  if (!stopped) {
+    return res.status(404).json({ error: `Task "${taskName}" not found` });
+  }
+  
+  res.json({ reply: `Task "${taskName}" stopped` });
+});
+
+app.post("/api/tasks/:taskName/start", (req, res) => {
+  const { taskName } = req.params;
+  const started = taskManager.startTask(taskName);
+  
+  if (!started) {
+    return res.status(404).json({ error: `Task "${taskName}" not found` });
+  }
+  
+  res.json({ reply: `Task "${taskName}" started` });
+});
+
+const server = app.listen(port, async () => {
   console.log(`Server running on http://localhost:${port}`);
   if (telegramBotToken) {
     console.log(`Telegram webhook endpoint ready: ${telegramWebhookPath}`);
   }
+  
+  // Initialize cron scheduler
+  console.log("\n📅 Initializing Cron Scheduler...");
+  await taskManager.loadTasks();
 });
 
 async function shutdown() {

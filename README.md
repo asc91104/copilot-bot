@@ -27,6 +27,47 @@ npm start
 ```
 Open [http://localhost:3000](http://localhost:3000).
 
+## Cron Scheduler
+The application includes a built-in cron scheduler for recurring tasks.
+
+### Task Folder Structure
+All scheduled tasks are stored in `src/tasks/` with the naming convention: `<taskName>.task.js`
+
+### Creating a Task
+1. Create a file in `src/tasks/` named `<taskName>.task.js`
+2. Export a default configuration object with:
+   - `name`: Unique task identifier
+   - `schedule`: Cron expression (see [crontab.guru](https://crontab.guru/))
+   - `handler`: Async function to execute
+   - `description` (optional): Task description
+
+Example:
+```javascript
+// src/tasks/cleanup.task.js
+export default {
+  name: 'daily-cleanup',
+  schedule: '0 2 * * *', // 2 AM daily
+  description: 'Clean up temporary files',
+  handler: async () => {
+    console.log('Running cleanup...');
+    // Your cleanup logic here
+  }
+};
+```
+
+### Task Management APIs
+- `GET /api/tasks` - List all scheduled tasks
+- `GET /api/tasks/:taskName` - Get task details
+- `POST /api/tasks/:taskName/start` - Resume a paused task
+- `POST /api/tasks/:taskName/stop` - Pause a task
+
+### Common Cron Patterns
+- Every 5 minutes: `*/5 * * * *`
+- Every hour: `0 * * * *`
+- Daily at midnight: `0 0 * * *`
+- Every Monday at midnight: `0 0 * * 1`
+- Weekday 9am-5pm: `0 9-17 * * 1-5`
+
 ## Chat Commands
 - `/start`: create a new session (replaces existing one)
 - `/end`: end current session
